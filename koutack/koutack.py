@@ -1,4 +1,4 @@
-'''NAMES OF THE AUTHOR(S): ...'''
+'''NAMES OF THE AUTHOR(S): Alexandre Girard, Guillaume Croteau'''
 
 from search import *
 import copy
@@ -78,8 +78,24 @@ class Koutack(Problem):
                 newState[x][y+1] = []
         return newState
 
-
-
+def printSolution(path):
+    for n in path:
+        for line in n.state:
+            grid = ""
+            for element in line:
+                if len(element) == 0:
+                    grid += ". "
+                elif len(element) == 1:
+                    grid += element[0] + " "
+                else:
+                    grid += "["
+                    for i in range(len(element)):
+                        grid += element[i]
+                        if i != len(element) - 1:
+                            grid += ","
+                    grid += "] "
+            print(grid)
+        print("\n")
 
 ###################### Launch the search #########################
 problem=Koutack(sys.argv[1])
@@ -88,11 +104,8 @@ problem=Koutack(sys.argv[1])
     #print(state, '\n')
 #print(problem.initial)
 #print(problem.goal_test(problem.initial))
-#example of bfs search
 node=depth_limited_search(problem)
-#example of print
 path=node.path()
 path.reverse()
-for n in path:
-    print(n.state) #assuming that the __str__ function of states output the correct format
-        
+
+printSolution(path)
