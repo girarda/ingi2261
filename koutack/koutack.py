@@ -29,11 +29,30 @@ class Koutack(Problem):
         return self.get_number_pile(state) == 1
 
     def successor(self, state):
+        # non_empty_positions = [position for position in state.keys() if (len(state[position]) > 0)]
+        # for pos in non_empty_positions:
+        #     for adj_pos in self.get_adjacent_positions(state, pos[0], pos[1]):
+        #         if self.can_merge(state, adj_pos[0], adj_pos[1]):
+        #             yield "ACTION!", self.merge(state, adj_pos[0], adj_pos[1])
+
         for i in range(self.height):
             for j in range(self.width):
-                if(self.is_empty(state, i, j)):
-                    if self.can_merge(state, i, j):
-                        yield "ACTION!", self.merge(state, i, j)
+                if not (self.is_empty(state, i, j)):
+                    for pos in self.get_adjacent_positions(state, i, j):
+                        if self.can_merge(state, pos[0], pos[1]):
+                            yield "ACTION!", self.merge(state, pos[0], pos[1])
+
+    def get_adjacent_positions(self, state, x, y):
+        positions = []
+        if x > 0:
+            positions.append((x-1, y))
+        if x < self.height-1:
+            positions.append((x+1, y))
+        if y > 0:
+            positions.append((x, y-1))
+        if y < self.width-1:
+            positions.append((x, y+1))
+        return positions
 
     def get_number_pile(self, state):
         return len((list(x for x in state.values() if len(x) > 0)))
@@ -58,7 +77,7 @@ class Koutack(Problem):
         return count
 
     def can_merge(self, state, x, y):
-        return self.count_adjacent_piles(state, x, y) >= 2
+        return self.count_adjacent_piles(state, x, y) >= 2 and self.is_empty(state, x, y)
 
     def merge(self, state, x, y):
         newState = deepish_copy(state)
