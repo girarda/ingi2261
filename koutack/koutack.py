@@ -95,15 +95,15 @@ class Koutack(Problem):
     def printSolution(self, path):
         for n in path:
             #print(len(n.state))
-            for i in range(self.height):
+            for x in range(4):
                 grid = ""
-                for j in range(self.width):
+                for y in range(self.width):
                     #print(n.state[i*self.width + j])
 
-                    print("width: {}".format(self.width))
-                    print("height: {}".format(self.height))
-                    print("{}, {}".format(i, j))
-                    element = n.state[i * self.width + j] 
+                    # print("width: {}".format(self.width))
+                    # print("height: {}".format(self.height))
+                    # print("{}".format(x))
+                    element = n.state[x * self.width + y] 
                     if len(element) == 0:
                        grid += ". "
                     elif len(element) == 1:
