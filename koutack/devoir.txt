@@ -1,0 +1,79 @@
+1. Python AIMA
+
+1.
+
+We only need to extend the Problem class. This class is an abstraction of a Problem, and provides an interface to solve a search problem. It is used by the tree_search to find the next node when expanding a node during the search. The Problem class is also used to test if the current state is the goal state in the search, to know when to return the current node, which is the goal state.
+
+2.
+
+Yield is a generator. Its elements are lazily generated, which means that they are only generated when they are needed. This means that instead of building the complete list of nodes upfront, they can be calculated one at the time, reducing the required memory.
+
+3.
+
+The difference is that the Breadth-first algorithm uses a first-in-first-out queue, while the Depth-first algorithm uses a stack. This means that the breadth-first search will look at every node at a certain level before going to the next one while the depth-first search will go down a path, and bubble up once it reaches the end of its branch.
+
+4.
+
+A closed set is used in the graph search to avoid visiting the states more than once. However, this means that more space is required to perform this search since the closed set's size grows linearly with the number of nodes in the graph.
+
+5.
+
+A dictionary, or a hashmap, is used to store the visited states. A set could also have been used. To be able to store a key in the dictionary, the key must be hashable, which means that it must not contain lists, dictionaries, sets, or other mutable objects. Hashmaps are used to retrieve elements in constant time relative to its size. It means that it does not slow down as the dictionary's size grows.
+
+6.
+
+By representing states as generic configuration of the state, since the close set would store the hash of the state, two different, but symmetrical states would be considered to be the same. For example, in the Koutack problem, two boards with the same pile size in the same position, but with different tiles would have the same representation.
+
+Ex:
+This board
+. . . . .
+. [c,a,b] . d e
+. . . . .
+f g . h i
+. . . . .
+
+is symmetrical to this one:
+. . . . .
+. [b,d,e] . a c 
+. . . . .
+f g . h i
+. . . . .
+
+And by only representing them by the number of tiles on each position, they would be considered the same:
+0 0 0 0 0
+0 3 0 1 1
+0 0 0 0 0
+1 1 0 1 1
+0 0 0 0 0
+
+2. The Koutack Problem
+
+1.
+
+Depth first:
+- If no maximum depth is set, this search approach can take a lot of time because it can follow a wrong path for a long time.
+- It is faster than breadth-first search
+- It takes less space than breadth-first search
+
+Breadth first:
+- This method takes a lot of time since for every move, every possibility must be tested before going on with the next move.
+- For example, every possible first move must be tested before doing a second move.
+- Furthermore, this takes up a lot of space as a lot of branches are created and must be kept in memory for the next move.
+
+2.
+
+Yes there are equivalent states in this problem. This means that a naive solution would not consider duplicated states and search these equivalent states more than once. It is possible to avoid expanding symmetrical states twice by using the approach explained in 1.6.
+
+3.
+
+Tree:
+- It requires less space than graphs if using a depth-first search algorithm
+- It does not allow us to avoid expending twice symmetrical states
+
+Graph:
+- It requires more space because of the closed list
+- This allows us to avoid expending twice symmetrical states
+
+4.
+
+5.
