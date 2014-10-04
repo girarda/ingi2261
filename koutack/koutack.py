@@ -59,7 +59,8 @@ class Koutack(Problem):
         return self.count_adjacent_piles(state, x, y) >= 2
 
     def merge(self, state, x, y):
-        newState = copy.deepcopy(state)
+        newState = unshared_copy(state)
+        
         if x > 0:
             if not self.is_empty(state, x-1, y):
                 newState[x][y] += state[x-1][y]
@@ -76,6 +77,7 @@ class Koutack(Problem):
             if not self.is_empty(state, x, y+1):
                 newState[x][y] += state[x][y+1]
                 newState[x][y+1] = []
+        
         return newState
 
 def printSolution(path):
@@ -95,8 +97,12 @@ def printSolution(path):
                             grid += ","
                     grid += "] "
             print(grid)
-        print("\n")
+        print("")
 
+def unshared_copy(inList):
+    if isinstance(inList, list):
+        return list( map(unshared_copy, inList) )
+    return inList
 ###################### Launch the search #########################
 problem=Koutack(sys.argv[1])
 #succ = problem.successor(problem.initial)
@@ -104,6 +110,7 @@ problem=Koutack(sys.argv[1])
     #print(state, '\n')
 #print(problem.initial)
 #print(problem.goal_test(problem.initial))
+#node = breadth_first_tree_search(problem)
 node=depth_limited_search(problem)
 path=node.path()
 path.reverse()
