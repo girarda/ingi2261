@@ -50,7 +50,7 @@ class Koutack(Problem):
     def is_empty(self, state, x, y):
         #print("{}, {}, {}".format(self.height, self.width, len(state)))
         #print("{}, {}".format(x, y))
-        return len(state[x + (self.width-1) * y]) == 0
+        return len(state[x * (self.width) + y]) == 0
 
     def count_adjacent_piles(self, state, x, y):
         count = 0
@@ -75,41 +75,48 @@ class Koutack(Problem):
         newState = state[:]
         if x > 0:
             if not self.is_empty(state, x-1, y):
-                newState[x + (self.width-1) * y] += state[(x-1) + (self.width-1) * y]
-                newState[(x-1) + (self.width-1) * y] = ()
+                newState[x * self.width + y] += state[(x-1) * (self.width) + y]
+                newState[(x-1) * (self.width) + y] = ()
         if x < self.height-1:
             if not self.is_empty(state, x+1, y):
-                newState[x + (self.width-1) * y] += state[(x+1) + (self.width-1) * y]
-                newState[(x+1) + (self.width-1) * y] = ()
+                newState[x * (self.width) + y] += state[(x+1) * (self.width) + y]
+                newState[(x+1) * (self.width) + y] = ()
         if y > 0:
             if not self.is_empty(state, x, y-1):
-                newState[x + (self.width-1) * y] += state[x + (self.width-1) * (y-1)]
-                newState[x + (self.width-1) * (y-1)] = ()
+                newState[x * (self.width) + y] += state[x * (self.width) + (y-1)]
+                newState[x * (self.width) + (y-1)] = ()
         if y < self.width-1:
             if not self.is_empty(state, x, y+1):
-                newState[x + (self.width-1) * y] += state[x + (self.width-1) * (y+1)]
-                newState[x + (self.width-1) * (y+1)] = ()
+                newState[x * (self.width) + y] += state[x * (self.width) + (y+1)]
+                newState[x * (self.width) + (y+1)] = ()
         
         return newState
 
-def printSolution(path):
-    for n in path:
-        for line in n.state:
-            grid = ""
-            for element in line:
-                if len(element) == 0:
-                    grid += ". "
-                elif len(element) == 1:
-                    grid += element[0] + " "
-                else:
-                    grid += "["
-                    for i in range(len(element)):
-                        grid += element[i]
-                        if i != len(element) - 1:
-                            grid += ","
-                    grid += "] "
-            print(grid)
-        print("")
+    def printSolution(self, path):
+        for n in path:
+            #print(len(n.state))
+            for i in range(self.height):
+                grid = ""
+                for j in range(self.width):
+                    #print(n.state[i*self.width + j])
+
+                    print("width: {}".format(self.width))
+                    print("height: {}".format(self.height))
+                    print("{}, {}".format(i, j))
+                    element = n.state[i * self.width + j] 
+                    if len(element) == 0:
+                       grid += ". "
+                    elif len(element) == 1:
+                       grid += element[0] + " "
+                    else:
+                       grid += "["
+                       for i in range(len(element)):
+                           grid += element[i]
+                           if i != len(element) - 1:
+                               grid += ","
+                       grid += "] "
+                print(grid)
+            print("")
 
 def unshared_copy(inList):
     if isinstance(inList, list):
@@ -123,4 +130,4 @@ if __name__ == '__main__':
     path=node.path()
     path.reverse()
 
-    printSolution(path)
+    problem.printSolution(path)
