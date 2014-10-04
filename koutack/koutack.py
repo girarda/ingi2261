@@ -9,13 +9,22 @@ class Koutack(Problem):
 
     def __init__(self,init):
         self.initial = [line.split() for line in open(init)]
-        for i in range(len(self.initial)):
-            for j in range(len(self.initial[0])):
-                if self.initial[i][j] == '.':
-                    self.initial[i][j] = []
-                else:
-                    self.initial[i][j] = list(self.initial[i][j])
+        self.height = len(self.initial)
+        self.width = len(self.initial[0]) 
 
+        ll = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if self.initial[i][j] == '.':
+                    self.initial[i ][j] = ()
+                    ll.append(())
+                else:
+                    ll.append(tuple(self.initial[i][j]))
+
+        self.initial = ll
+
+        #print(self.initial)
+        #exit()
         ## Sum of piles = 1
         self.goal = 1
     
@@ -23,34 +32,38 @@ class Koutack(Problem):
         return self.get_number_pile(state) == 1
 
     def successor(self, state):
-        for i in range(len(state)):
-            for j in range(len(state[0])):
+        for i in range(self.height):
+            for j in range(self.width):
                 if(self.is_empty(state, i, j)):
                     if self.can_merge(state, i, j):
-                        yield "ACTION!", self.merge(state, i, j)        
+                        yield "ACTION!", self.merge(state, i, j)
+
     def get_number_pile(self, state):
-        count = 0
-        for line in state:
-            for c in line:
-                if len(c) > 0:
-                    count+=1
-        return count
+        # return len([for pos in state if len()])
+        #return len(list(filter(len, state)))
+         count = 0
+         for line in state:
+             if len(line) > 0:
+                 count+=1
+         return count
 
     def is_empty(self, state, x, y):
-        return len(state[x][y]) == 0
+        #print("{}, {}, {}".format(self.height, self.width, len(state)))
+        #print("{}, {}".format(x, y))
+        return len(state[x + (self.width-1) * y]) == 0
 
     def count_adjacent_piles(self, state, x, y):
         count = 0
         if x > 0:
             if not self.is_empty(state, x-1, y):
                 count +=1
-        if x < len(state)-1:
+        if x < self.height-1:
             if not self.is_empty(state, x+1, y):
                 count +=1
         if y > 0:
             if not self.is_empty(state, x, y-1):
                 count +=1
-        if y < len(state)-1:
+        if y < self.width-1:
             if not self.is_empty(state, x, y+1):
                 count +=1
         return count
@@ -59,24 +72,23 @@ class Koutack(Problem):
         return self.count_adjacent_piles(state, x, y) >= 2
 
     def merge(self, state, x, y):
-        newState = unshared_copy(state)
-        
+        newState = state[:]
         if x > 0:
             if not self.is_empty(state, x-1, y):
-                newState[x][y] += state[x-1][y]
-                newState[x-1][y] = []
-        if x < len(state)-1:
+                newState[x + (self.width-1) * y] += state[(x-1) + (self.width-1) * y]
+                newState[(x-1) + (self.width-1) * y] = ()
+        if x < self.height-1:
             if not self.is_empty(state, x+1, y):
-                newState[x][y] += state[x+1][y]
-                newState[x+1][y] = []
+                newState[x + (self.width-1) * y] += state[(x+1) + (self.width-1) * y]
+                newState[(x+1) + (self.width-1) * y] = ()
         if y > 0:
             if not self.is_empty(state, x, y-1):
-                newState[x][y] += state[x][y-1]
-                newState[x][y-1] = []
-        if y < len(state[0])-1:
+                newState[x + (self.width-1) * y] += state[x + (self.width-1) * (y-1)]
+                newState[x + (self.width-1) * (y-1)] = ()
+        if y < self.width-1:
             if not self.is_empty(state, x, y+1):
-                newState[x][y] += state[x][y+1]
-                newState[x][y+1] = []
+                newState[x + (self.width-1) * y] += state[x + (self.width-1) * (y+1)]
+                newState[x + (self.width-1) * (y+1)] = ()
         
         return newState
 
@@ -104,15 +116,11 @@ def unshared_copy(inList):
         return list( map(unshared_copy, inList) )
     return inList
 ###################### Launch the search #########################
-problem=Koutack(sys.argv[1])
-#succ = problem.successor(problem.initial)
-#for act, state in succ:
-    #print(state, '\n')
-#print(problem.initial)
-#print(problem.goal_test(problem.initial))
-#node = breadth_first_tree_search(problem)
-node=depth_limited_search(problem)
-path=node.path()
-path.reverse()
+if __name__ == '__main__':
+    problem=Koutack(sys.argv[1])
 
-printSolution(path)
+    node=breadth_first_tree_search(problem)
+    path=node.path()
+    path.reverse()
+
+    printSolution(path)
