@@ -11,7 +11,7 @@ class Koutack(Problem):
         self.initial = [line.split() for line in open(init)]
         self.height = len(self.initial)
         self.width = len(self.initial[0]) 
-        self.explored_states = []
+        self.explored_states = {}
         ll = {}
         for i in range(self.height):
             for j in range(self.width):
@@ -34,12 +34,18 @@ class Koutack(Problem):
                     if self.can_merge(state, i, j):
                         newState = self.merge(state, i, j)
                         if not self.is_similar_to_previously_explored_states(newState):
-                            self.explored_states.append(newState)
-                            yield "ACTION!", newState
+                            #print(len(self.explored_states))
+                            self.explored_states[self.get_number_pile(newState)].append(newState)
+                            yield None, newState
+                        #else:
+                            #print("SAME STATE!!")
 
     def is_similar_to_previously_explored_states(self, state):
             is_similar = False
-            for explored_state in self.explored_states:
+            number_piles = self.get_number_pile(state)
+            if number_piles not in self.explored_states:
+                self.explored_states[number_piles] = []
+            for explored_state in self.explored_states[number_piles]:
                 is_similar = explored_state.keys() == state.keys()
                 if is_similar:
                     is_similar = all(len(explored_state[pos]) == len(state[pos]) for pos in state)
@@ -51,7 +57,6 @@ class Koutack(Problem):
                     #input()
                     return True
             return False
-
 
     def get_number_pile(self, state):
         # return len([for pos in state if len()])
@@ -73,7 +78,7 @@ class Koutack(Problem):
             if (x*self.width + y-1) in state:
                 count +=1
         if y < self.width-1:
-            if (x*self.width + y+1) in state:#not self.is_empty(state, x, y+1):
+            if (x*self.width + y+1) in state:#not 
                 count +=1
         # print(count)
         # if x == 1 and y == 0:
@@ -156,11 +161,11 @@ def deepish_copy(org):
     return out
 
 ###################### Launch the search #########################
-#if __name__ == '__main__':
-problem=Koutack(sys.argv[1])
+if __name__ == '__main__':
+    problem=Koutack(sys.argv[1])
 
-node=breadth_first_tree_search(problem)
-path=node.path()
-path.reverse()
+    node=breadth_first_tree_search(problem)
+    path=node.path()
+    path.reverse()
 
-problem.printSolution(path)
+    problem.printSolution(path)
