@@ -95,7 +95,7 @@ class Koutack(Problem):
     def printSolution(self, path):
         for n in path:
             #print(len(n.state))
-            for x in range(4):
+            for x in range(self.height):
                 grid = ""
                 for y in range(self.width):
                     #print(n.state[i*self.width + j])
@@ -126,7 +126,7 @@ def unshared_copy(inList):
 if __name__ == '__main__':
     problem=Koutack(sys.argv[1])
 
-    node=breadth_first_tree_search(problem)
+    node=iterative_deepening_search(problem)
     path=node.path()
     path.reverse()
 
