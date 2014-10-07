@@ -2,7 +2,7 @@
 
 1.
 
-We only need to extend the Problem class. This class is an abstraction of a Problem, and provides an interface to solve a search problem. It is used by the tree_search to find the next node when expanding a node during the search. The Problem class is also used to test if the current state is the goal state in the search, to know when to return the current node, which is the goal state.
+We only need to extend the Problem class. This class is an abstraction of a Problem, and provides an interface to solve a search problem. It is used by the search algorithms to find the next node when expanding a node during the search. The Problem class is also used to test if the current state is the goal state in the search, to know when to return the current node, which is the goal state.
 
 2.
 
@@ -14,7 +14,7 @@ The difference is that the Breadth-first algorithm uses a first-in-first-out que
 
 4.
 
-A closed set is used in the graph search to avoid visiting the states more than once. However, this means that more space is required to perform this search since the closed set's size grows linearly with the number of nodes in the graph.
+A closed set is used in the graph search to avoid visiting the states more than once. However, this means that more space is required to perform this search since the closed set's size grows linearly with the number of nodes in the graph. Even though more space is required in the worst case, this closed list may allow the search algorithm to avoid expanding symmetrical states, thus, saving time, and even time when comparing with the breadth-first search.
 
 5.
 
@@ -90,13 +90,13 @@ By using a closed list and representing symmetrical states in the same way, one 
 3.
 
 Tree:
-- It requires less space than graphs if using a depth-first search algorithm
+- It requires more time than if using a depth-first search algorithm
 - It does not allow us to avoid expending twice symmetrical states
+- If using a breadth-first approach, it requires more space than using a graph
 
 Graph:
-- It requires more space because of the closed list
-- This allows us to avoid expending twice symmetrical states
-
+- This allows us to avoid expending twice symmetrical states, saving us a lot of time
+- If using a breadth-first approach, it requires less space than with a tree even if the closed-list is needed because there is less recursion
 4.
 
 5.
