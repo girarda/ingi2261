@@ -10,6 +10,20 @@ class State:
         self.piles = piles
         self.mergeables = mergeables
 
+    def __hash__(self):
+        return hash(frozenset(self.piles))
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            is_similar = False
+            number_piles = len(self.piles)
+            is_similar = other.piles.keys() == self.piles.keys()
+            if is_similar:
+                is_similar = all(len(other.piles[pos]) == len(self.piles[pos]) for pos in self.piles)
+            if is_similar:
+                return True
+        return False
+
 class Koutack(Problem):
 
     def __init__(self,init):
@@ -34,7 +48,7 @@ class Koutack(Problem):
 
         ## Sum of piles = 1
         self.goal = 1
-    
+
     def goal_test(self, state):
         return self.get_number_pile(state.piles) == 1
 
@@ -141,9 +155,9 @@ def deepish_copy(org):
     return out
 
 ###################### Launch the search #########################
-# problem=Koutack(sys.argv[1])
-# node=breadth_first_tree_search(problem)
-# path=node.path()
-# path.reverse()
+problem=Koutack(sys.argv[1])
+node=breadth_first_graph_search(problem)
+path=node.path()
+path.reverse()
 
-# printSolution(path)
+printSolution(path)
