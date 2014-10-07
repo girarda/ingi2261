@@ -22,29 +22,8 @@ A dictionary, or a hashmap, is used to store the visited states. A set could als
 
 6.
 
-By representing states as generic configuration of the state, since the close set would store the hash of the state, two different, but symmetrical states would be considered to be the same. For example, in the Koutack problem, two boards with the same pile size in the same position, but with different tiles would have the same representation.
+By representing states as generic configuration of the state, since the close set would store the hash of the state, two different, but symmetrical states would be considered to be the same. This way, the search will not visit symmetrical states more than once.
 
-Ex:
-This board
-. . . . .
-. [c,a,b] . d e
-. . . . .
-f g . h i
-. . . . .
-
-is symmetrical to this one:
-. . . . .
-. [b,d,e] . a c 
-. . . . .
-f g . h i
-. . . . .
-
-And by only representing them by the number of tiles on each position, they would be considered the same:
-0 0 0 0 0
-0 3 0 1 1
-0 0 0 0 0
-1 1 0 1 1
-0 0 0 0 0
 
 2. The Koutack Problem
 
@@ -54,15 +33,59 @@ Depth first:
 - If no maximum depth is set, this search approach can take a lot of time because it can follow a wrong path for a long time.
 - It is faster than breadth-first search
 - It takes less space than breadth-first search
+- It does not always find the optimal solution
 
 Breadth first:
 - This method takes a lot of time since for every move, every possibility must be tested before going on with the next move.
 - For example, every possible first move must be tested before doing a second move.
-- Furthermore, this takes up a lot of space as a lot of branches are created and must be kept in memory for the next move.
+- Furthermore, this can take up a lot of space as a lot of branches are created and must be kept in memory for the next move.
 
 2.
 
-Yes there are equivalent states in this problem. This means that a naive solution would not consider duplicated states and search these equivalent states more than once. It is possible to avoid expanding symmetrical states twice by using the approach explained in 1.6.
+Yes there are equivalent states in this problem. This means that a naive solution would not consider duplicated states and search these equivalent states more than once. By applying two independent moves in different orders, the board will be the same, but by taking different paths.
+For example:
+
+With this initial board:
+. a . . . .
+. b . c . .
+d . . e . .
+f . . g h .
+. i j . . .
+
+By applying these moves:
+. a . . . .
+. . [b, c] . . .
+d . . e . .
+f . . g h .
+. i j . . .
+
+. a . . . .
+. . [b, c] . . .
+d . . e . .
+f . [g, j] . h .
+. i . . . .
+
+We get this state:
+. a . . . .
+. . [b, c] . . .
+d . . e . .
+f . [g, j] . h .
+. i . . . .
+
+We can see that by applying the moves in the opposite order, we can obtain the same state:
+. a . . . .
+. b . c . .
+d . . e . .
+f . [g, j] . h .
+. i . . . .
+
+. a . . . .
+. . [b, c] . . .
+d . . e . .
+f . [g, j] . h .
+. i . . . .
+
+By using a closed list and representing symmetrical states in the same way, one can avoid expending symmetrical states more than once.
 
 3.
 
