@@ -127,12 +127,15 @@ class Koutack(Problem):
                 for j in range(self.width):
                     element = ""
                     if (i,j) in n.state.piles:
-                        print("[", end="")
-                        for k in n.state.piles[(i,j)]:
-                            print(k, end="")
-                            if k != n.state.piles[(i,j)][-1]:
-                                print(",", end="")
-                        print("]", end="")
+                        if len(n.state.piles[(i,j)]) > 1:
+                            print("[", end="")
+                            for k in n.state.piles[(i,j)]:
+                                print(k, end="")
+                                if k != n.state.piles[(i,j)][-1]:
+                                    print(",", end="")
+                            print("]", end="")
+                        else:
+                            print(n.state.piles[(i,j)][0], end="")
                     else:
                         print(".", end="")
                     if j < self.width-1:
@@ -140,7 +143,6 @@ class Koutack(Problem):
                     else:
                         print("")
             print("")
-
 
 def deepish_copy(org):
     '''
