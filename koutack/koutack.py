@@ -119,24 +119,28 @@ class Koutack(Problem):
     
         return newState
 
-def printSolution(path):
-    for n in path:
-        for line in n.state:
+    def printSolution(self, path):
+        for n in path:
             grid = ""
-            for element in line:
-                if len(element) == 0:
-                    grid += ". "
-                elif len(element) == 1:
-                    grid += element[0] + " "
-                else:
-                    grid += "["
-                    for i in range(len(element)):
-                        grid += element[i]
-                        if i != len(element) - 1:
-                            grid += ","
-                    grid += "] "
-            print(grid)
-        print("")
+
+            for i in range(self.height):
+                for j in range(self.width):
+                    element = ""
+                    if (i,j) in n.state.piles:
+                        print("[", end="")
+                        for k in n.state.piles[(i,j)]:
+                            print(k, end="")
+                            if k != n.state.piles[(i,j)][-1]:
+                                print(",", end="")
+                        print("]", end="")
+                    else:
+                        print(".", end="")
+                    if j < self.width-1:
+                        print(" ", end="")
+                    else:
+                        print("")
+            print("")
+
 
 def deepish_copy(org):
     '''
@@ -160,4 +164,4 @@ node=breadth_first_graph_search(problem)
 path=node.path()
 path.reverse()
 
-printSolution(path)
+problem.printSolution(path)
