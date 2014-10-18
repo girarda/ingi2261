@@ -4,6 +4,7 @@
 
 from search import *
 import copy
+import functools
 
 ######################  Implement the search #######################
 
@@ -63,8 +64,9 @@ class MazeCollect(Problem):
          #   #   # $ ####  +
         """
         self.number_explored_nodes = 0
-
-        lines = [line for line in open(init)]
+        with open(init, 'r') as content_file:
+            self.initial_file = content_file.read()
+        lines = [line.strip('\n') for line in open(init)]
         maze = []
 
         currentPos = (0,0)
@@ -87,6 +89,7 @@ class MazeCollect(Problem):
                 elif char is '#':
                     wallPos.add((row, col))
         self.initial = State(maze, currentPos, chestPos, moneyPos, wallPos, height, width)
+        self.initial_number_of_money = len(moneyPos)
 
     def goal_test(self, state):
         """
@@ -111,7 +114,7 @@ class MazeCollect(Problem):
         """
         Assume can move there
         """
-        newState = State(state.maze, state.currentPos, state.chestPos, state.moneyPos.copy(), state.wallPos.copy(), state.height, state.width)
+        newState = State(state.maze, state.currentPos, state.chestPos, state.moneyPos.copy(), state.wallPos, state.height, state.width)
         newState.currentPos = adjPos
         if adjPos in newState.moneyPos:
             newState.moneyPos.remove(adjPos)
@@ -137,17 +140,75 @@ class MazeCollect(Problem):
                 adjPos.append((currentPos[0], currentPos[1]+1))
         return adjPos
 
-    def h(self, state):
-        return 42
+    def h(self, node):
+        state = node.state
+
+        heuristics = []
+        dist_current_chest = self.manathan_distance(state.currentPos, state.chestPos)
+
+        if len(state.moneyPos) > 0:
+            #dist_current_money = map(functools.partial(self.manathan_distance, state.currentPos), state.moneyPos)
+            #dist_chest_money = map(functools.partial(self.manathan_distance, state.chestPos), state.moneyPos)
+            #dist_money_money = [self.manathan_distance(p1, p2) for p1 in state.moneyPos for p2 in state.moneyPos if p1 != p2]
+
+            # heuristics.append(max(dist_current_money))
+            # heuristics.append(len(state.moneyPos))
+            # heuristics.append(min(dist_chest_money))
+            # heuristics.append(dist_current_chest)
+            heuristics.append(self.min_spanning_tree_total_length(state))
+            #if len(state.moneyPos) > 1:
+            #    heuristics.append(max(dist_money_money))
+        else:
+            #heuristics.append(self.min_spanning_tree_total_length(state))
+            heuristics.append(dist_current_chest)
+            #heuristics.append(self.min_spanning_tree_total_length(state))
+
+        return max(heuristics)
+
+    def min_spanning_tree_total_length(self, state):
+        edges = [] #(p1, p2, length)
+
+        for money in state.moneyPos:
+            edges.append((state.currentPos, money, self.manathan_distance(state.currentPos, money)))
+            edges.append((state.chestPos, money, self.manathan_distance(state.chestPos, money)))
+            for other_money in state.moneyPos:
+                if other_money != money:
+                    edges.append((other_money, money, self.manathan_distance(other_money, money)))
+
+        if len(state.moneyPos) == 0:
+            edges.append((state.currentPos, state.chestPos, self.manathan_distance(state.currentPos, state.chestPos)))
+        edges.sort(key=lambda tup: tup[2])
+
+        s = {}
+
+        for money in state.moneyPos:
+            s[money] = set([money])
+
+        s[state.currentPos] = set([state.currentPos])
+        s[state.chestPos] = set([state.chestPos])
+
+        length = 0
+        for e in edges:
+            if e[1] not in s[e[0]]:
+                s[e[0]] |= s[e[1]]
+
+                for connected_nodes in s[e[0]]:
+                    s[connected_nodes] |= s[e[0]]
+                length += e[2]
+
+        return length
+
+    def manathan_distance(self, p1, p2):
+        return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
     def print_solution(self, path):
         """
         Input: In order path to the solution
         Output: Print the solution
         """
-        for n in path:
+        print(self.initial_file)
+        for n in path[1:]:
             state = n.state
-            print(state.currentPos)
             for i in range(state.height):
                 for j in range(state.width):
                     if (i,j) in state.moneyPos:
@@ -161,7 +222,7 @@ class MazeCollect(Problem):
                     else:
                         print(" ", end='')
                 print("")
-            print("==============")
+            print("")
 
 def deepish_copy(org):
     """
@@ -180,9 +241,10 @@ def deepish_copy(org):
     return out
 
 ###################### Launch the search #########################
-problem=MazeCollect(sys.argv[1])
-node=astar_graph_search(problem, problem.h)
-path=node.path()
-path.reverse()
+if __name__ == "__main__":
+    problem=MazeCollect(sys.argv[1])
+    node=astar_graph_search(problem, problem.h)
+    path=node.path()
+    path.reverse()
 
-problem.print_solution(path)
+    problem.print_solution(path)
