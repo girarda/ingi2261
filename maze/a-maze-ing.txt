@@ -1,0 +1,15 @@
+Magic
+
+To avoid exploring symmetrical states, we prune our graph by eliminating certain nodes. By assuming that we will no go backwards unless there is a wall or we get a money (and therefore our current goal changes), we can avoid going into cells that are not in the direction we are currently going. Whenever we move, we can therefore prune all the cells that are in a straight line behind us until it reaches a wall. 
+
+When we reach a cell containing money, we simply have to unprune the graph to be able to move anywhere.
+
+This is inspired by the jump point search optimization, without the long jumps to keep the whole path. However, by jumping in straight lines instead of moving by small steps, we could potentially reduce the running time by an order of magnitude.
+
+3.
+
+No, the A-star is not always faster. It takes more time for the mazeCollect1 even though it explores less nodes than the uninformed search because of the time to calculate the heuristics. However, as the number of visited node increases, the informed search becomes much faster than the uninformed search as it is able to visit a lot less nodes.
+
+4.
+
+The number of nodes explored by A* is always smaller than the number of nodes explored by breadth first search since the heuristics guide the search towards the goal, which means that as A* explores, it always gets closer, or at equal distance, to the goal, while the breadth first search might explore states which brings it farther from the goal.
