@@ -11,6 +11,15 @@ import functools
 class State:
     def __init__(self, maze, currentPos, chestPos, moneyPos, wallPos, height, width, pruned):
         """
+        A state is defined as:
+        - The initial maze
+        - The current position (x, y)
+        - The position of the chest (x, y)
+        - The position of the money [(x, y)]
+        - The position of the walls [(x, y)]
+        - The maze's height
+        - The maze's width
+        - The position of the pruned's cells
         """
         self.maze = maze
         self.currentPos = currentPos
@@ -31,7 +40,7 @@ class State:
         Input: other: another State
         Output: boolean representing whether the two states are equal
 
-        Two states are equal if for every position on the board, they have the same number of tiles
+        Two states are equal if the initial mazes are the same, the current position is the same, and the position of the money are the same
         """
         return self.maze == self.maze and self.currentPos == other.currentPos and self.moneyPos == other.moneyPos
 
@@ -96,6 +105,7 @@ class MazeCollect(Problem):
         """
         Input: state
         Output: boolean representing whether the state is the goal state
+        A state is the goal test if there is no more money to get and the current position == the position of the chest
         """
         return len(state.moneyPos) == 0 and state.currentPos == state.chestPos
 
@@ -104,7 +114,7 @@ class MazeCollect(Problem):
         Input: state
         Output: states reachable from state
 
-        We only need to iterate through the mergeable positions and try to merge them
+        We only need to iterate through the empty cells adjacent to the current position
         """
         for adjacent_position in self.find_adjacent_empty_positions(state):
             newState = self.move(state, adjacent_position)
@@ -113,6 +123,9 @@ class MazeCollect(Problem):
 
     def move(self, state, adjPos):
         """
+        Move from the state's current position to adjPos
+        Prune cells to eliminate symmetrical states
+        If adjPos contains money, the money is removed from the new state and the pruned cells set is emptied
         Assume can move there
         """
         newState = State(state.maze, state.currentPos, state.chestPos, state.moneyPos.copy(), state.wallPos, state.height, state.width, state.pruned.copy())
@@ -123,16 +136,18 @@ class MazeCollect(Problem):
         if adjPos in newState.moneyPos:
             newState.moneyPos.remove(adjPos)
             newState.pruned = set()
-            # print(newState.moneyPos)
-            # print("{}     {} ".format(state.currentPos, adjPos))
-        # print(state.currentPos)
-        # print(adjPos)
-        # print(newState.pruned)
-        # exit()
+
         return newState
 
     def prune(self, state, adjPos):
+        """
+        Prune cells to avoid exploring symmetrical states.
+        By assuming that we will no go backwards unless there is a wall or 
+        we get a money (and therefore our current goal changes), we can avoid going
+        into cells that are not in the direction we are currently going.
 
+        This is a simplification of the Jump point Search optimization (without the long jumps).
+        """
         if state.currentPos[0] < adjPos[0]:
             tmp = state.currentPos
             while tmp not in state.wallPos and tmp and tmp[0] >= 0:
@@ -154,21 +169,10 @@ class MazeCollect(Problem):
                 state.pruned.add(tmp)
                 tmp = (tmp[0], tmp[1] + 1)
 
-
-        # if state.currentPos[0] > adjPos[0]:
-        #     state.pruned.add((adjPos[0] + 1, adjPos[1]))
-        #     self.prune(state, (adjPos[0] + 1, adjPos[1]))
-        # else:
-        #     state.pruned.add((adjPos[0] - 1, adjPos[1]))
-        #     self.prune(state, (adjPos[0]-1, adjPos[1]))
-        # if state.currentPos[1] > adjPos[1]:
-        #     state.pruned.add((adjPos[0], adjPos[1]+1))
-        #     self.prune(state, (adjPos[0], adjPos[1]+1))
-        # else:
-        #     state.pruned.add((adjPos[0], adjPos[1]-1))
-        #     self.prune(state, (adjPos[0], adjPos[1]-1))
-
     def find_adjacent_empty_positions(self, state):
+        """
+        Return a list of the empty cells adjacent to the state's current position
+        """
         currentPos = state.currentPos
         adjPos = []
 
@@ -187,31 +191,30 @@ class MazeCollect(Problem):
         return adjPos
 
     def h(self, node):
+        """
+        Returns the max value of the different heuristics used.
+        Currently, only one heuristic is used at a given time.
+        If there is still money in the maze, we use a modification of the minimum spanning tree
+        If there is no more money, we use the manathan_distance between the current position and the position of the chest
+        """
         state = node.state
 
         heuristics = []
         dist_current_chest = self.manathan_distance(state, state.currentPos, state.chestPos)
 
         if len(state.moneyPos) > 0:
-            # dist_current_money = map(functools.partial(self.manathan_distance, state, state.currentPos), state.moneyPos)
-            # dist_chest_money = map(functools.partial(self.manathan_distance, state, state.chestPos), state.moneyPos)
-            # dist_money_money = [self.manathan_distance(state, p1, p2) for p1 in state.moneyPos for p2 in state.moneyPos if p1 != p2]
-
-            # heuristics.append(max(dist_current_money))
-            # heuristics.append(len(state.moneyPos))
-            # heuristics.append(min(dist_chest_money))
-            # heuristics.append(dist_current_chest)
             heuristics.append(self.min_spanning_tree_total_length(state))
-            #if len(state.moneyPos) > 1:
-            #    heuristics.append(max(dist_money_money))
         else:
-            #heuristics.append(self.min_spanning_tree_total_length(state))
             heuristics.append(dist_current_chest)
-            #heuristics.append(self.min_spanning_tree_total_length(state))
 
         return max(heuristics)
 
     def min_spanning_tree_total_length(self, state):
+        """
+        Returns the distance of the minimum spanning tree between all the money +
+        the distance between the current position and the nearest money +
+        the distance between the chest position and the money it is nearest to
+        """
         edges = [] #(p1, p2, length)
 
         dist_current_money = map(functools.partial(self.manathan_distance, state, state.currentPos), state.moneyPos)
@@ -227,9 +230,6 @@ class MazeCollect(Problem):
 
         for money in state.moneyPos:
             s[money] = set([money])
-
-        # s[state.currentPos] = set([state.currentPos])
-        # s[state.chestPos] = set([state.chestPos])
 
         MST_edges = []
         nodes = {}
@@ -247,6 +247,9 @@ class MazeCollect(Problem):
         return length
 
     def manathan_distance(self, state, p1, p2):
+        """
+        Returns the manathan distance between two points (x, y)
+        """
         return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
 
     def print_solution(self, path):
@@ -271,22 +274,6 @@ class MazeCollect(Problem):
                         print(" ", end='')
                 print("")
             print("")
-
-def deepish_copy(org):
-    """
-    much, much faster than deepcopy, for a dict of the simple python types.
-    """
-    out = dict().fromkeys(org)
-    for k,v in org.items():
-        try:
-            out[k] = v.copy()   # dicts, sets
-        except AttributeError:
-            try:
-                out[k] = v[:]   # lists, tuples, strings, unicode
-            except TypeError:
-                out[k] = v      # ints
- 
-    return out
 
 ###################### Launch the search #########################
 # if __name__ == "__main__":
