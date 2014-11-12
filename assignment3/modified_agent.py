@@ -73,7 +73,64 @@ class Agent(zombies.Agent, minimax.Game):
         import zombies
 
         board = state[0]
-        return  board.get_score(self.player)
+
+        surundingNecromencerWeight = 100
+
+        weightPieces = {zombies.NECROMANCER:1, zombies.HUGGER:10, zombies.JUMPER:20, zombies.CREEPER:5, zombies.SPRINTER:20}
+
+        movesScoreP1 = 0
+        movesScoreP2 = 0
+
+        scoreOfPiecesP1 = 0
+        scoreOfPiecesP2 = 0
+
+        for position in board.pieces:
+            piece = board.pieces[position]
+
+            if type(piece) is list:
+                piece = piece[-1]
+
+            pieceID = abs(piece)
+
+            moves = []
+
+            if piece == zombies.NECROMANCER:
+                moves = board.get_necromancer_moves(position)
+            elif piece == zombies.HUGGER:
+                moves = board.get_hugger_moves(position)
+            elif piece == zombies.JUMPER:
+                moves = board.get_jumper_moves(position)
+            elif piece == zombies.CREEPER:
+                moves = board.get_creeper_moves(position)
+            elif piece == zombies.SPRINTER:
+                moves = board.get_sprinter_moves(position)
+            else:
+                continue
+
+            pieceScore = weightPieces[pieceID] * len(moves)
+            print("Piece score {}".format(pieceScore))
+            if piece > 0:
+                movesScoreP2 += pieceScore
+                scoreOfPiecesP2 += pieceScore
+            else:
+                movesScoreP1 += pieceScore
+                scoreOfPiecesP1 += pieceScore
+
+        movesScore = 0
+        if self.player == zombies.PLAYER1:
+            print("Moves score {}".format(movesScoreP1))
+            movesScore = movesScoreP1 #- movesScoreP2
+        else:
+            movesScore = movesScoreP2 #- movesScoreP1
+            print("Moves score {}".format(movesScoreP2))
+
+        movesWeight = 0.1
+
+        moveValue = movesWeight * movesScore
+
+        score = surundingNecromencerWeight * board.get_score(self.player) + moveValue
+        print(moveValue)
+        return score
 
     def play(self, board, player, step, time_left):
         """This function is used to play a move according
