@@ -26,6 +26,8 @@ class Agent(zombies.Agent, minimax.Game):
     def __init__(self, name="Agent"):
         self.name = name
         self.player = zombies.PLAYER1
+        self.time_left = 0
+        self.previous_time = None
 
     def successors(self, state):
         """The successors function must return (or yield) a list of
@@ -64,7 +66,7 @@ class Agent(zombies.Agent, minimax.Game):
         """The cutoff function returns true if the alpha-beta/minimax
         search has to stop; false otherwise.
         """
-        return depth >= 2 or state[0].is_finished() 
+        return depth >= 2 or state[0].is_finished() or (self.time_left - self.previous_time) > 3
 
     def evaluate(self, state):
         """The evaluate function must return an integer value
@@ -72,65 +74,40 @@ class Agent(zombies.Agent, minimax.Game):
         """
         import zombies
 
+        weightPieces = {zombies.NECROMANCER:50, zombies.HUGGER:20, zombies.JUMPER:10, zombies.CREEPER:5, zombies.SPRINTER:20}
+
         board = state[0]
 
-        surundingNecromencerWeight = 100
+        scoreWeight = 10
+        score = board.get_score(self.player)
 
-        weightPieces = {zombies.NECROMANCER:1, zombies.HUGGER:10, zombies.JUMPER:20, zombies.CREEPER:5, zombies.SPRINTER:20}
+        piecesValue = 0
+        piecesValueWeight = 10
 
-        movesScoreP1 = 0
-        movesScoreP2 = 0
-
-        scoreOfPiecesP1 = 0
-        scoreOfPiecesP2 = 0
-
+        huggedValue = 0
+        huggedWeight = 12
+        
         for position in board.pieces:
             piece = board.pieces[position]
-
             if type(piece) is list:
-                piece = piece[-1]
-
-            pieceID = abs(piece)
-
-            moves = []
-
-            if piece == zombies.NECROMANCER:
-                moves = board.get_necromancer_moves(position)
-            elif piece == zombies.HUGGER:
-                moves = board.get_hugger_moves(position)
-            elif piece == zombies.JUMPER:
-                moves = board.get_jumper_moves(position)
-            elif piece == zombies.CREEPER:
-                moves = board.get_creeper_moves(position)
-            elif piece == zombies.SPRINTER:
-                moves = board.get_sprinter_moves(position)
+                for p in piece:
+                    if p * self.player > 0:
+                        pieceType = p * self.player
+                        piecesValue += weightPieces[pieceType]
+                    else:
+                        pieceType = abs(p)
+                        huggedValue += weightPieces[pieceType]
             else:
-                continue
+                if piece * self.player > 0:
+                    pieceType = piece * self.player
+                    piecesValue += weightPieces[pieceType]
 
-            pieceScore = weightPieces[pieceID] * len(moves)
-            print("Piece score {}".format(pieceScore))
-            if piece > 0:
-                movesScoreP2 += pieceScore
-                scoreOfPiecesP2 += pieceScore
-            else:
-                movesScoreP1 += pieceScore
-                scoreOfPiecesP1 += pieceScore
+        # for position in board.pieces:
 
-        movesScore = 0
-        if self.player == zombies.PLAYER1:
-            print("Moves score {}".format(movesScoreP1))
-            movesScore = movesScoreP1 #- movesScoreP2
-        else:
-            movesScore = movesScoreP2 #- movesScoreP1
-            print("Moves score {}".format(movesScoreP2))
+        value = score  * scoreWeight + piecesValue * piecesValueWeight + huggedValue * huggedWeight
 
-        movesWeight = 0.1
-
-        moveValue = movesWeight * movesScore
-
-        score = surundingNecromencerWeight * board.get_score(self.player) + moveValue
-        print(moveValue)
-        return score
+        print("value: {}".format(value))
+        return value
 
     def play(self, board, player, step, time_left):
         """This function is used to play a move according
@@ -140,7 +117,11 @@ class Agent(zombies.Agent, minimax.Game):
         """
         import minimax
         self.player = player
-        self.time_left = time_left
+
+        if self.previous_time:
+            self.previous_time = self.time_left
+        else:
+            self.previous_time = time_left
         state = (board, player, step)
         return minimax.search(state, self)
 
