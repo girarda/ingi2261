@@ -99,10 +99,6 @@ class Knapsack(Problem):
         replaceItems = [state for state in replaceItems if state is not None and state.isConsistent()]
         batshitlist += addItems
 
-
-        for state in batshitlist:
-            print(state)
-
         for state in batshitlist:
             yield None, state
 
@@ -166,7 +162,7 @@ class Knapsack(Problem):
 ###################### Launch the search #########################
 if __name__ == "__main__":
     problem=Knapsack(sys.argv[1])
-    node = random_walk(problem)
+    node = randomized_maxvalue(problem)
     # node=astar_graph_search(problem, problem.h)
     # path=node.path()
     # path.reverse()

@@ -241,6 +241,31 @@ def random_walk(problem, limit=100, callback=None):
             best = current
     return best
 
+def maxvalue(problem, limit=100, callback=None):
+    current = LSNode(problem, problem.initial, 0)
+    best = current
+    for step in range(limit):
+        if callback is not None:
+            callback(current)
+        current = max(list(current.expand()), key=lambda x: x.value())
+        if current.value() > best.value():
+            best = current
+    return best
+
+def randomized_maxvalue(problem, limit=100, callback=None):
+    current = LSNode(problem, problem.initial, 0)
+    best = current
+    for step in range(limit):
+        if callback is not None:
+            callback(current)
+        allNexts = list(current.expand())
+        allNexts.sort(key=lambda x: -x.value())
+        bestFive = allNexts[:5]
+        current = random.choice(bestFive)
+
+        if current.value() > best.value():
+            best = current
+    return best
 
 def exp_schedule(k=20, lam=0.05, limit=100):
     """One possible schedule function for simulated annealing"""
